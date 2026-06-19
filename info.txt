@@ -1,6 +1,11 @@
 // Part One of the lesson
 1) run -> uvicorn main_part2:app --reload
 2) swagger -> http://localhost:8000/docs
+3) create secretKey python -c "import secrets; print(secrets.token_hex(32))"
+
+// Password
+user1) vrstelios@example.com, TestPassword1!
+user2) test@example.com, TestPassword2!
 
 // Schema database
 CREATE TABLE post (
@@ -19,5 +24,6 @@ CREATE TABLE users_f (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(120) NOT NULL UNIQUE,
+    password_hash VARCHAR(200) NOT NULL UNIQUE,
     image_file VARCHAR(200)
 );
