@@ -6,6 +6,7 @@
 // Password
 user1) vrstelios@example.com, TestPassword1!
 user2) test@example.com, TestPassword2!
+user3) vr@gamail.com, TestPassword3!
 
 // Schema database
 CREATE TABLE post (
