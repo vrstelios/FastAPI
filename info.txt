@@ -2,11 +2,7 @@
 1) run -> uvicorn main_part2:app --reload
 2) swagger -> http://localhost:8000/docs
 3) create secretKey python -c "import secrets; print(secrets.token_hex(32))"
-
-// Password
-user1) vrstelios@example.com, TestPassword1!
-user2) test@example.com, TestPassword2!
-user3) vr@gamail.com, TestPassword3!
+4) run script from path "/FastAPI" and write "uv run python -m scripts.populate_magration_db"
 
 // Schema database
 CREATE TABLE post (
