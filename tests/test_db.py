@@ -1,15 +1,14 @@
 import asyncio
 from datetime import UTC, datetime, timedelta
-from http.client import responses
 from pathlib import Path
 
 import httpx
 from sqlalchemy import delete, select, update
 
-import models
-from database import AsyncSessionLocal, engine
-from image_utils import PROFILE_PICS_DIR
-from main_part13 import app
+from app.models import models
+from app.core.database import AsyncSessionLocal, engine
+from app.utils.image_utils import PROFILE_PICS_DIR
+from app.main_part14 import app
 
 POPULATE_IMAGES_DIR = Path("populate_images")
 

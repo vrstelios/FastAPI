@@ -5,7 +5,8 @@ from pathlib import Path
 from PIL import Image, ImageOps
 from cffi.model import qualify
 
-PROFILE_PICS_DIR = Path("media/profile_pics")
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+PROFILE_PICS_DIR = BASE_DIR / "media" / "profile_pics"
 
 def process_profile_image(content: bytes) -> str:
     with Image.open(BytesIO(content)) as original: #open the image

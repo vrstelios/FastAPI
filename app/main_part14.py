@@ -1,4 +1,8 @@
+import mimetypes
+mimetypes.add_type('application/javascript', '.js')
+
 from typing import Annotated
+from pathlib import Path
 
 from contextlib import asynccontextmanager
 from fastapi.exception_handlers import (
@@ -10,16 +14,19 @@ from fastapi import FastAPI, Request, HTTPException, status, Depends
 from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-import models
-from database import Base, engine, get_db
-from routers import posts, users
+from app.models import models
+from app.core.database import Base, engine, get_db
+from app.api import posts, users
+from app.core.config import settings
 
-""" Organizing Routes into Modules with APIRouter """
+CURRENT_DIR = Path(__file__).resolve().parent
+
+""" Password Rest - Email, Tokens and Background Tasks"""
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -32,24 +39,41 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/media", StaticFiles(directory="media"), name="media")
-
-templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory=CURRENT_DIR / "static"), name="static")
+app.mount("/media", StaticFiles(directory=CURRENT_DIR.parent / "media"), name="media")
+templates = Jinja2Templates(directory=CURRENT_DIR / "templates")
 
 # Added files which includes the routes
 app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(posts.router, prefix="/api/posts", tags=["posts"])
 
+# This endpoint loads all posts and renders the home page.
 @app.get("/", include_in_schema=False, name="home")
 @app.get("/posts", include_in_schema=False, name="posts")
 async def home(request: Request, db: Annotated[AsyncSession, Depends(get_db)]):
-    result = await db.execute(select(models.Post).options(selectinload(models.Post.author))) # loading the relationships in SQLAlchemy
+    count_result = await db.execute(select(func.count()).select_from(models.Post))
+    total = count_result.scalar() or 0
+
+    result = await db.execute(
+        select(models.Post)
+        .options(selectinload(models.Post.author))
+        .order_by(models.Post.date_posted.desc())
+        .limit(settings.posts_per_page),
+    ) # loading the relationships in SQLAlchemy
+
     posts = result.scalars().all()
+
+    has_more = len(posts) < total
+
     return templates.TemplateResponse(
         request,
         "home.html",
-        {"posts": posts, "title": "Home"},
+        {
+            "posts": posts,
+            "title": "Home",
+            "limit": settings.posts_per_page,
+            "has_more": has_more,
+        },
     )
 
 @app.get("/posts/{post_id}", include_in_schema=False)
@@ -71,8 +95,12 @@ async def post_page(request: Request, post_id: int, db: Annotated[AsyncSession, 
     # json handling error
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
 
-@app.get("/user/{user_id}/posts", include_in_schema=False, name="user_posts")
-async def user_posts_page(request: Request, user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
+@app.get("/users/{user_id}/posts", include_in_schema=False, name="user_posts")
+async def user_posts_page(
+    request: Request,
+    user_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
     result = await db.execute(select(models.User).where(models.User.id == user_id))
     user = result.scalars().first()
     if not user:
@@ -81,15 +109,56 @@ async def user_posts_page(request: Request, user_id: int, db: Annotated[AsyncSes
             detail="User not found",
         )
 
+    count_result = await db.execute(
+        select(func.count())
+        .select_from(models.Post)
+        .where(models.Post.user_id == user_id),
+    )
+    total = count_result.scalar() or 0
+
     result = await db.execute(
         select(models.Post)
-        .options(selectinload(models.Post.author)) # loading the relationships in SQLAlchemy
-        .where(models.Post.user_id == user_id))
+        .options(selectinload(models.Post.author))
+        .where(models.Post.user_id == user_id)
+        .order_by(models.Post.date_posted.desc())
+        .limit(settings.posts_per_page),
+    )
     posts = result.scalars().all()
+
+    has_more = len(posts) < total
+
     return templates.TemplateResponse(
         request,
         "user_posts.html",
-        {"posts": posts, "user": user, "title": f"{user.username}'s Posts"},
+        {
+            "posts": posts,
+            "user": user,
+            "title": f"{user.username}'s Posts",
+            "limit": settings.posts_per_page,
+            "has_more": has_more,
+        },
+    )
+
+# Login Endpoint
+@app.get("/login", include_in_schema=False)
+async def login_page(request: Request):
+    return templates.TemplateResponse(
+        request,"login.html", {"title": "Login"},
+    )
+
+# Register Endpoint
+@app.get("/register", include_in_schema=False)
+async def register_page(request: Request):
+    return templates.TemplateResponse(
+        request,"register.html", {"title": "Register"},
+    )
+
+@app.get("/account", include_in_schema=False)
+async def account_page(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "account.html",
+        {"title": "Account"},
     )
 
 # html handling error

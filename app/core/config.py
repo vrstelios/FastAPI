@@ -1,10 +1,16 @@
+from pathlib import Path
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+ENV_FILE_PATH = ROOT_DIR / ".env"
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=ENV_FILE_PATH,
         env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore"
     )
 
     secret_key: SecretStr
