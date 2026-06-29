@@ -1,22 +1,26 @@
-from datetime import timedelta
+from datetime import timedelta, UTC, datetime, timezone
 from typing import Optional
-from fastapi import HTTPException, status, UploadFile
+from fastapi import HTTPException, BackgroundTasks, status, UploadFile
 from PIL import UnidentifiedImageError
+from pyexpat.errors import messages
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.concurrency import run_in_threadpool
 from sqlalchemy.orm import selectinload
 
+from sqlalchemy import delete as sql_delete
+
 from app.models import models
 from app.core.config import settings
-from app.utils.image_utils import delete_profile_image, process_profile_image
+from app.utils.image import delete_profile_image, process_profile_image
 from app.database.schema import (
-    UserCreate, UserUpdate, Token, PaginatedPostsResponse, PostResponse
+    UserCreate, UserUpdate, Token, PaginatedPostsResponse, PostResponse, ChangePasswordRequest, ForgotPasswordRequest, ResetPasswordRequest,
 )
 from app.core.auth import (
-    hash_password, verify_password, create_access_token
+    hash_password, verify_password, create_access_token, generate_reset_token, hash_reset_token, CurrentUser
 )
 
+from app.utils.email import send_password_reset_email
 
 class UserService:
     def __init__(self, db: AsyncSession):
@@ -83,8 +87,90 @@ class UserService:
 
         return user
 
+    async def forgot_password(self, request_data: ForgotPasswordRequest, background_tasks: BackgroundTasks) -> dict:
+        result = await self.db.execute(
+            select(models.User).where(
+                func.lower(models.User.email) == request_data.email.lower(),
+            ),
+        )
+        user = result.scalars().first()
+
+        if user:
+            # delete old token of the user
+            await self.db.execute(
+                sql_delete(models.PasswordResetToken).where(
+                    models.PasswordResetToken.user_id == user.id
+                )
+            )
+            # create new token
+            token = generate_reset_token()
+            token_hash = hash_password(token)
+            expires_at = datetime.now() + timedelta(minutes=settings.reset_token_expire_minutes)
+
+            reset_token = models.PasswordResetToken(
+                user_id=user.id,
+                token_hash=token_hash,
+                expires_at=expires_at,
+            )
+            self.db.add(reset_token)
+            await self.db.commit()
+
+            background_tasks.add_task(
+                send_password_reset_email,
+                to_email=user.email,
+                username=user.username,
+                token=token,
+            )
+
+            return {
+                "message": "If an account exists with this email, you will receive password reset instructions."
+            }
+
+    async def reset_password(self, request_data: ResetPasswordRequest):
+        now_utc = datetime.now(timezone.utc)
+        result = await self.db.execute(
+            select(models.PasswordResetToken).where(models.PasswordResetToken.expires_at > now_utc)
+        )
+        reset_tokens = result.scalars().all()
+
+        matched_token = None
+        for t in reset_tokens:
+            if verify_password(request_data.token, t.token_hash):
+                matched_token = t
+                break
+
+        if not matched_token:
+            raise  HTTPException(status.HTTP_400_BAD_REQUEST, detail="Invalid or expired reset token")
+
+        user_result = await self.db.execute(
+            select(models.User).where(models.User.id == matched_token.user_id)
+        )
+        user = user_result.scalars().first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired reset token")
+
+        user.password_hash = hash_password(request_data.new_password)
+
+        await self.db.execute(sql_delete(models.PasswordResetToken).where(models.PasswordResetToken.user_id == user.id))
+        await self.db.commit()
+
+        return {
+            "message": "Password reset successfully. You can noe log in with your new password."
+        }
+
+    async def change_password(self, password_data: ChangePasswordRequest, current_user: CurrentUser):
+        if not verify_password(password_data.current_password, current_user.password_hash):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect")
+
+        current_user.password_hash = hash_password(password_data.new_password)
+
+        await self.db.execute(sql_delete(models.PasswordResetToken).where(models.PasswordResetToken.user_id == current_user.id))
+        await self.db.commit()
+
+        return {"message": "Password changed successfully"}
+
     async def get_user_posts(self, user_id: int, skip: int, limit: int) -> PaginatedPostsResponse:
-        await self.get_user_by_id(user_id)
+        await self.get_user(user_id)
 
         count_result = await self.db.execute(
             select(func.count()).select_from(models.Post).where(models.Post.user_id == user_id),
@@ -115,7 +201,7 @@ class UserService:
         if user_id != current_user_id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to update this user")
 
-        user = await self.get_user_by_id(user_id)
+        user = await self.get_user(user_id)
 
         if user_update.username is not None and user_update.username.lower() != user.username.lower():
             result = await self.db.execute(
@@ -141,7 +227,7 @@ class UserService:
         if user_id != current_user_id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to delete this user")
 
-        user = await self.get_user_by_id(user_id)
+        user = await self.get_user(user_id)
         old_filename = user.image_file
 
         await self.db.delete(user)
