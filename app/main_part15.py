@@ -20,19 +20,16 @@ from sqlalchemy.orm import selectinload
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.models import models
-from app.core.database import Base, engine, get_db
+from app.core.database import engine, get_db
 from app.api import posts, users
 from app.core.config import settings
 
 CURRENT_DIR = Path(__file__).resolve().parent
 
-""" Password Rest - Email, Tokens and Background Tasks"""
+""" PostgreSQL and Alembic - Database Migrations for Production """
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    # Startup
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
     yield
     # Shutdown
     await engine.dispose()
@@ -96,11 +93,7 @@ async def post_page(request: Request, post_id: int, db: Annotated[AsyncSession, 
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
 
 @app.get("/users/{user_id}/posts", include_in_schema=False, name="user_posts")
-async def user_posts_page(
-    request: Request,
-    user_id: int,
-    db: Annotated[AsyncSession, Depends(get_db)],
-):
+async def user_posts_page(request: Request, user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(select(models.User).where(models.User.id == user_id))
     user = result.scalars().first()
     if not user:

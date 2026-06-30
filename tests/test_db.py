@@ -8,14 +8,14 @@ from sqlalchemy import delete, select, update
 from app.models import models
 from app.core.database import AsyncSessionLocal, engine
 from app.utils.image import PROFILE_PICS_DIR
-from app.main_part14 import app
+from app.main_part15 import app
 
 POPULATE_IMAGES_DIR = Path("populate_images")
 
 USERS = [
     {
-        "username": "CoreyMSchafer",
-        "email": "CoreyMSchafer@gmail.com",
+        "username": "vrstelios",
+        "email": "vrstelios@gmail.com",
         "password": "TestPassword1!",
         "image": "corey.png",
     },
@@ -232,7 +232,6 @@ POST_44 = {
     "content": "If you've paginated all the way to this post, the 44th one... you get to learn this fun fact: that my high school football number was #44. Other notable absolute legends who wore number #44 include: Jerry West (NBA - Also fellow WV Native), Hank Aaron (MLB), and Floyd Little (NFL).",
 }
 
-
 async def clear_existing_data() -> None:
     # Delete profile pictures from local storage
     if PROFILE_PICS_DIR.exists():
@@ -243,6 +242,7 @@ async def clear_existing_data() -> None:
 
     # Clear database tables (order respects foreign keys)
     async with AsyncSessionLocal() as db:
+        await db.execute(delete(models.PasswordResetToken))
         await db.execute(delete(models.Post))
         await db.execute(delete(models.User))
         await db.commit()
@@ -302,12 +302,12 @@ async def populate() -> None:
             )
             response.raise_for_status()
             user = response.json()
-            print(f" Created: {user['username']}")
+            print(f"  Created: {user['username']}")
 
             response = await client.post(
                 "/api/users/token",
                 data={
-                    "username": user["email"],
+                    "username": user_data["email"],
                     "password": user_data["password"],
                 },
             )
@@ -329,9 +329,11 @@ async def populate() -> None:
                         headers={"Authorization": f"Bearer {token}"},
                     )
                     response.raise_for_status()
-                    print(f" Updated: {image_name}")
+                    print(f"    Uploaded: {image_name}")
 
-            users.append({"id": user["id"], "username": user["username"], "token": token})
+            users.append(
+                {"id": user["id"], "username": user["username"], "token": token},
+            )
 
         print(f"\nCreating {len(POSTS) + 1} posts...")
 
