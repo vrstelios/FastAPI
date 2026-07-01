@@ -1,3 +1,4 @@
+from logging import exception
 from typing import Annotated
 from fastapi import APIRouter, Depends, Query, status, UploadFile, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
@@ -11,6 +12,8 @@ from app.database.schema import (
 from app.core.config import settings
 from app.core.auth import CurrentUser
 from app.services.users_service import UserService
+
+from botocore.exceptions import ClientError
 
 router = APIRouter()
 

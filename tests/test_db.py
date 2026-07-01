@@ -7,8 +7,7 @@ from sqlalchemy import delete, select, update
 
 from app.models import models
 from app.core.database import AsyncSessionLocal, engine
-from app.utils.image import PROFILE_PICS_DIR
-from app.main_part15 import app
+from app.main_part16 import app
 
 POPULATE_IMAGES_DIR = Path("populate_images")
 
@@ -17,7 +16,7 @@ USERS = [
         "username": "vrstelios",
         "email": "vrstelios@gmail.com",
         "password": "TestPassword1!",
-        "image": "corey.png",
+        "image": "vr.png",
     },
     {
         "username": "DefaultDude",
@@ -26,227 +25,224 @@ USERS = [
         # No image - uses default
     },
     {
-        "username": "WillowTheCat",
-        "email": "TestEmail3@test.com",
+        "username": "gopher",
+        "email": "TestGopher@test.com",
         "password": "TestPassword3!",
-        "image": "willow.png",
+        "image": "gopher.png",
     },
     {
-        "username": "FarmDogs",
-        "email": "TestEmail4@test.com",
+        "username": "favicon-gopher",
+        "email": "TestFaviconGopher@test.com",
         "password": "TestPassword4!",
-        "image": "farmdogs.png",
+        "image": "favicon-gopher.png",
     },
     {
-        "username": "PoppyTheCoder",
-        "email": "TestEmail5@test.com",
+        "username": "stick",
+        "email": "TestStixk@test.com",
         "password": "TestPassword5!",
-        "image": "poppy.png",
+        "image": "stick.png",
     },
     {
-        "username": "GoodBoyBronx",
-        "email": "TestEmail6@test.com",
+        "username": "log",
+        "email": "Testlog@test.com",
         "password": "TestPassword6!",
-        "image": "bronx.png",
+        "image": "log.png",
     },
 ]
 
 POSTS = [
     {
-        "title": "Why I Love FastAPI",
-        "content": "FastAPI has completely changed how I build APIs. The automatic documentation, type hints, and async support make development so much faster. Plus, the performance is incredible!",
+        "title": "Why Golang is So Popular",
+        "content": "Go combines simplicity, performance, and reliability. Its fast compilation times and efficient concurrency model make it a favorite for modern backend services."
     },
     {
-        "title": "Corey Schafer Has the Best YouTube Tutorials!",
-        "content": "This was written by a viewer and definitely not by me... I mean him. Totally not written by him, but by me... a real viewer. Seriously, check out his channel for amazing Python content.",
+        "title": "Getting Started with Go Modules",
+        "content": "Go Modules make dependency management easy. Initialize a project with 'go mod init' and let Go handle versioning automatically."
     },
     {
-        "title": "Async/Await Finally Clicked",
-        "content": "I've been struggling with async programming for months, but FastAPI's approach finally made it click. Using 'async def' for endpoints and 'await' for database calls just makes sense.",
+        "title": "Understanding Goroutines",
+        "content": "Goroutines are lightweight threads managed by the Go runtime. You can launch thousands of them with minimal overhead."
     },
     {
-        "title": "Schafer? I Barely Know Her!",
-        "content": "Is anyone actually reading these blog posts? Do they really need to say anything? I can keep going all day. At least AI can... Claude, keep going, please.",
+        "title": "Channels Explained",
+        "content": "Channels provide safe communication between goroutines. They help avoid shared memory issues and simplify concurrent programming."
     },
     {
-        "title": "Pydantic Validation is Magic",
-        "content": "The way Pydantic handles validation in FastAPI is incredible. Define your model with type hints, and boom - automatic validation, serialization, and documentation. No more writing validation code by hand!",
+        "title": "Why Go Compiles So Fast",
+        "content": "Go was designed for developer productivity. Incremental builds and a streamlined compiler allow projects to compile in seconds."
     },
     {
-        "title": "From Flask to FastAPI",
-        "content": "I made the switch from Flask to FastAPI last month. The learning curve was minimal, and the benefits are huge. Automatic OpenAPI docs, better performance, and native async support. No regrets!",
+        "title": "Error Handling in Go",
+        "content": "Go favors explicit error handling. Returning errors as values makes failures visible and encourages developers to handle them properly."
     },
     {
-        "title": "Some of My Favorite Horror Movies",
-        "content": "I love horror movies and practical effects. One of my favorites is 'The Thing'. Hereditary is a great modern one, but most people have seen it. One modern one I really liked that not as many people have seen is 'The Night House'. It's a slow burn but really effective. More psychological than jump-scare based.",
+        "title": "Structs are Powerful",
+        "content": "Structs allow you to group related data together. Combined with methods, they provide a clean way to model business logic."
     },
     {
-        "title": "Type Hints Changed My Life",
-        "content": "I used to think type hints were just extra typing (pun intended). But after using FastAPI, I see how they enable incredible tooling - better autocomplete, automatic validation, and self-documenting code.",
+        "title": "Interfaces in Golang",
+        "content": "Interfaces define behavior rather than implementation. They help keep code flexible, testable, and loosely coupled."
     },
     {
-        "title": "The Power of Dependency Injection",
-        "content": "FastAPI's dependency injection system is so elegant. Need a database session? Just add it as a parameter. Need the current user? Same thing. It makes the code so clean and testable.",
+        "title": "Building REST APIs with Gin",
+        "content": "Gin is one of the most popular frameworks for Go. It offers excellent performance, middleware support, and a simple API."
     },
     {
-        "title": "SQLAlchemy 2.0 Is Worth the Upgrade",
-        "content": "If you're still using SQLAlchemy 1.x patterns, it's time to upgrade. The new 2.0 style with select() and mapped_column() is much more explicit and works beautifully with async.",
+        "title": "Fiber: Fast and Minimal",
+        "content": "Fiber is inspired by Express.js but built for Go. It focuses on speed and developer productivity."
     },
     {
-        "title": "Hot Take: Python > JavaScript for APIs",
-        "content": "Yes, I said it. For backend APIs, Python with FastAPI beats Node.js. Fight me in the comments. (Just kidding, this blog doesn't have comments... yet.)",
+        "title": "Dependency Injection in Go",
+        "content": "Go often relies on constructor injection. Passing dependencies explicitly keeps code simple and easy to test."
     },
     {
-        "title": "Understanding HTTP Status Codes",
-        "content": "200 OK, 201 Created, 400 Bad Request, 404 Not Found, 500 Internal Server Error. Learn these codes - they're how your API communicates with the world. FastAPI makes it easy to return the right ones.",
+        "title": "Working with JSON",
+        "content": "The encoding/json package provides powerful tools for marshaling and unmarshaling JSON data with minimal code."
     },
     {
-        "title": "Some of My Favorite Video Games",
-        "content": "The one I probably play the most, but not my favorite, is League of Legends... It's a love/hate relationship. If you play, you get it. My favorites are all single-player RPGs. The Elder Scrolls series (Especially Morrowind and Skyrim) were awesome. The Baldur's Gate series took up a lot of my time as a kid, and more recently, the 3rd one was great. Speaking of Baldur's Gate, I love that old isometric style of RPG, so I looked for more modern equivalents and found Pillars of Eternity, which was fantastic. Also both Pathfinder: Kingmaker and Wrath of the Righteous were a lot of fun as well.",
+        "title": "Context Package Essentials",
+        "content": "The context package is used to manage deadlines, cancellation signals, and request-scoped values across API boundaries."
     },
     {
-        "title": "JWT Authentication Demystified",
-        "content": "JSON Web Tokens seemed scary at first, but they're actually pretty simple. Encode some user data, sign it with a secret, and use it to verify requests. FastAPI + PyJWT makes it straightforward.",
+        "title": "Concurrency Done Right",
+        "content": "Go's concurrency primitives make writing scalable applications easier. Goroutines and channels help manage workloads efficiently."
     },
     {
-        "title": "Tips for API Design",
-        "content": "Use nouns for resources (/users, /posts), HTTP verbs for actions (GET, POST, PUT, DELETE), and return consistent responses. FastAPI's response_model helps enforce this consistency.",
+        "title": "Slices vs Arrays",
+        "content": "Arrays have fixed sizes while slices provide dynamic behavior. In practice, slices are used much more frequently."
     },
     {
-        "title": "Path Parameters vs Query Parameters",
-        "content": "Use path parameters for required resource identifiers (/users/123) and query parameters for optional filters (/posts?author=corey&limit=10). FastAPI handles both beautifully with automatic validation.",
+        "title": "Maps in Golang",
+        "content": "Maps offer efficient key-value storage and are commonly used for caching, indexing, and configuration data."
     },
     {
-        "title": "Error Handling Done Right",
-        "content": "Don't just return 500 for everything! Use HTTPException to return meaningful status codes and messages. Your API consumers will thank you when debugging issues.",
+        "title": "Testing in Go",
+        "content": "Go includes built-in testing support. Simply create files ending with _test.go and run tests using 'go test'."
     },
     {
-        "title": "Why I Switched to UV",
-        "content": "UV is blazingly fast for Python package management. Install packages in milliseconds instead of minutes. If you haven't tried it yet, you're missing out!",
+        "title": "Benchmarking Applications",
+        "content": "Go provides benchmarking capabilities out of the box. Benchmarks help identify performance bottlenecks early."
     },
     {
-        "title": "What About Favorite Books?",
-        "content": "I don't read a lot of fiction. The last fiction book I read was 'The Martian' by Andy Weir, which I really enjoyed. But most of my reading is non-fiction. Some of my favorites are 'Meditations' by Marcus Aurelius, 'Conscious' by Annaka Harris, 'How to Die' by Seneca, and 'The Last Lecture' by Randy Pausch. The latest fiction book I'm reading through (and have been for a while) is 'House of Leaves' by Mark Z. Danielewski. It's... different, but awesome.",
+        "title": "Building CLI Applications",
+        "content": "Go is excellent for command-line tools thanks to its fast execution speed and single binary deployment."
     },
     {
-        "title": "Testing FastAPI Applications",
-        "content": "FastAPI's TestClient makes testing a breeze. Write tests for your endpoints, mock dependencies, and catch bugs before they hit production. Your future self will thank you.",
+        "title": "Cross Platform Compilation",
+        "content": "Go allows developers to compile applications for Linux, Windows, and macOS without changing code."
     },
     {
-        "title": "Environment Variables and Security",
-        "content": "Never hardcode secrets! Use environment variables and pydantic-settings to keep your API keys, database URLs, and JWT secrets safe. It's Security 101.",
+        "title": "Working with PostgreSQL",
+        "content": "Go integrates well with PostgreSQL using libraries like pgx and GORM for database access."
     },
     {
-        "title": "CORS: The Bane of Frontend Devs",
-        "content": "Getting CORS errors? FastAPI's CORSMiddleware is your friend. Just remember: be specific about allowed origins in production. Don't use '*' unless you really mean it.",
+        "title": "Redis with Golang",
+        "content": "Redis is commonly used alongside Go applications for caching, queues, and session management."
     },
     {
-        "title": "Async Database Queries",
-        "content": "Blocking database calls in async code? That's a performance killer. Use async drivers like psycopg (for PostgreSQL) or aiosqlite to keep your event loop happy.",
+        "title": "Why Developers Love Go",
+        "content": "Go prioritizes readability and maintainability. The language intentionally avoids unnecessary complexity."
     },
     {
-        "title": "The Beauty of Response Models",
-        "content": "Response models aren't just for documentation - they filter out sensitive fields automatically. Define what goes out, and Pydantic handles the rest.",
+        "title": "Go Routines Everywhere",
+        "content": "Launching a goroutine requires only the 'go' keyword. This simplicity encourages concurrent application design."
     },
     {
-        "title": "Let's Talk Board Games",
-        "content": "I love Settlers of Catan. It's a classic for a reason. I'm actually going to make a sword in my woodshop soon that will be my friend group's trophy for the annual Catan champion that we're going to call 'The Katana of Catan'. One thing I've always wanted to do, but never have, is play an in-person Dungeons & Dragons campaign. I've played so many D&D inspired video games, but never the real deal. Hopefully someday...",
+        "title": "WebSockets in Go",
+        "content": "Libraries like Gorilla WebSocket make it easy to build chat systems, notifications, and real-time dashboards."
     },
     {
-        "title": "API Versioning Strategies",
-        "content": "APIs evolve. Version them from day one! Whether you use URL prefixes (/v1/users) or headers, plan for change. Breaking changes without versioning breaks trust.",
+        "title": "Microservices with Golang",
+        "content": "Go's performance and low memory footprint make it ideal for microservice architectures."
     },
     {
-        "title": "Background Tasks in FastAPI",
-        "content": "Don't make users wait for emails to send or files to process. FastAPI's BackgroundTasks lets you return immediately while work continues in the background.",
+        "title": "Building APIs with net/http",
+        "content": "The standard library includes a robust HTTP package capable of handling production workloads."
     },
     {
-        "title": "Rate Limiting Your API",
-        "content": "Protect your API from abuse with rate limiting. Too many requests? Return 429 Too Many Requests. Your server (and your wallet) will thank you.",
+        "title": "Middleware Patterns",
+        "content": "Middleware is commonly used for authentication, logging, metrics collection, and request validation."
     },
     {
-        "title": "Documentation That Writes Itself",
-        "content": "Add docstrings to your endpoints and they appear in Swagger UI. Add examples to your Pydantic models and they show up too. Documentation has never been this easy.",
+        "title": "Configuration Management",
+        "content": "Environment variables are widely used in Go applications to manage secrets and deployment settings."
     },
     {
-        "title": "WebSockets with FastAPI",
-        "content": "REST isn't the only game in town. FastAPI supports WebSockets for real-time communication. Chat apps, live updates, notifications - all possible!",
+        "title": "Go and Docker",
+        "content": "Go applications compile into static binaries, making them ideal candidates for lightweight Docker images."
     },
     {
-        "title": "Favorite Hobbies, You Ask?",
-        "content": "Woodworking, hands down. I love making things with wood, but I wish I had more time for it. There's something special about making something with your own hands, with materials that are local. A lot of the stuff I've built came from trees that fell on my family's property. My stuff might not always be as good as something you buy in a store, but there's a story and a connection there that makes it better than anything I could buy elsewhere.",
+        "title": "Containerizing Services",
+        "content": "Using multi-stage Docker builds can drastically reduce image sizes and improve deployment speed."
     },
     {
-        "title": "Custom Validators in Pydantic",
-        "content": "Need validation beyond type checking? Pydantic's field_validator and model_validator decorators let you add custom logic. Validate emails, check password strength, whatever you need.",
+        "title": "Learning Generics",
+        "content": "Generics introduced in Go 1.18 provide reusable abstractions while preserving performance and type safety."
     },
     {
-        "title": "The ORM vs Raw SQL Debate",
-        "content": "ORMs like SQLAlchemy add abstraction but can hide performance issues. Know when to use the ORM and when to drop to raw SQL. Both have their place.",
+        "title": "Understanding Pointers",
+        "content": "Pointers allow functions to modify data in place and help avoid unnecessary memory allocations."
     },
     {
-        "title": "Debugging Async Code",
-        "content": "Async bugs can be tricky. Use logging liberally, understand the event loop, and don't mix sync and async without care. asyncio.run() is your entry point.",
+        "title": "Package Organization",
+        "content": "Keeping packages focused and cohesive improves maintainability and encourages reusable components."
     },
     {
-        "title": "Containerizing FastAPI Apps",
-        "content": "Docker + FastAPI = deployment bliss. Create a Dockerfile, build your image, and deploy anywhere. Consistency across environments is priceless.",
+        "title": "Go for Cloud Native Development",
+        "content": "Many cloud-native tools including Kubernetes, Docker, and Prometheus are written in Go."
     },
     {
-        "title": "Health Check Endpoints",
-        "content": "Add a /health endpoint to your API. Load balancers and orchestrators need to know if your service is alive. Return 200 if healthy, details if not. I didn't do this in this tutorial, but there's only so much time in a video!",
+        "title": "Logging Best Practices",
+        "content": "Structured logging improves observability and simplifies debugging in distributed systems."
     },
     {
-        "title": "Hmm... What Else?",
-        "content": "I'm running out of ideas for these blog posts. Maybe I should just write about how great FastAPI is... Oh wait, I've already done that multiple times. Well, if you're still reading, thanks for sticking with it! You're awesome.",
+        "title": "Graceful Shutdowns",
+        "content": "Handling termination signals correctly ensures active requests complete before services stop."
     },
     {
-        "title": "Pagination: Don't Return Everything",
-        "content": "Returning 10,000 records in one response? Please don't. Implement pagination with limit and offset (or better, cursor-based). Your database and clients will be happier.",
+        "title": "Performance Profiling",
+        "content": "Go includes pprof for analyzing CPU usage, memory allocations, and execution bottlenecks."
     },
     {
-        "title": "OpenAPI Schema Customization",
-        "content": "FastAPI's auto-generated OpenAPI schema is great, but sometimes you need to customize. Add examples, descriptions, and tags to make your docs shine.",
+        "title": "Working with gRPC",
+        "content": "gRPC provides high-performance communication between services using Protocol Buffers."
     },
     {
-        "title": "Security Headers Matter",
-        "content": "Add security headers to your responses: X-Content-Type-Options, X-Frame-Options, Content-Security-Policy. Small effort, big security improvement.",
+        "title": "Go and Kubernetes",
+        "content": "The Kubernetes ecosystem is heavily influenced by Go, making it an excellent language for cloud engineers."
     },
     {
-        "title": "Caching Strategies",
-        "content": "Not every request needs to hit the database. Use caching with Redis or even in-memory for frequently accessed data. Your response times will plummet (in a good way).",
+        "title": "Building Scalable Systems",
+        "content": "Go excels at handling thousands of concurrent connections, making it perfect for scalable backend systems."
     },
     {
-        "title": "GraphQL vs REST",
-        "content": "GraphQL is trendy, but REST is battle-tested. Choose based on your needs, not hype. FastAPI excels at REST, but Strawberry brings GraphQL if you need it.",
+        "title": "Code Formatting with gofmt",
+        "content": "The gofmt tool automatically formats source code, ensuring consistent style across projects."
     },
     {
-        "title": "Movie Quotes!",
-        "content": "'You wanna know how I did it? This is how I did it, Anton. I never saved anything for the swim back.' - 'Gattaca'. One of my favorite movies of all time. As silly as it sounds, that movie is actually one of the main reasons I decided to pursue an internship at NASA back in college. After that internship, I found I had a craving to learn and do more. It pushed me to take programming more seriously, which eventually led me to where I am today... Which is writing a blog post about FastAPI that's just meant to fill space. TLDR: I watched Gattaca and now I'm writing sample blog posts at 3am on a Saturday for this FastAPI tutorial. And you can too!",
+        "title": "Managing Dependencies",
+        "content": "Go Modules simplify package management and make reproducible builds much easier."
     },
+    {
+        "title": "Why Go is Here to Stay",
+        "content": "Go continues to grow in popularity due to its excellent tooling, strong ecosystem, and focus on simplicity."
+    }
 ]
 
 # The 44th post - always the oldest (easter egg for pagination tutorial)
 POST_44 = {
-    "title": "Fun Fact: My High School Football Number Was #44",
-    "content": "If you've paginated all the way to this post, the 44th one... you get to learn this fun fact: that my high school football number was #44. Other notable absolute legends who wore number #44 include: Jerry West (NBA - Also fellow WV Native), Hank Aaron (MLB), and Floyd Little (NFL).",
+    "title": "Fun Fact About Golang",
+    "content": "Go was created at Google by Robert Griesemer, Rob Pike, and Ken Thompson. It was designed to simplify software engineering at scale while maintaining excellent performance and developer productivity."
 }
 
 async def clear_existing_data() -> None:
-    # Delete profile pictures from local storage
-    if PROFILE_PICS_DIR.exists():
-        for file in PROFILE_PICS_DIR.iterdir():
-            if file.is_file() and file.name != ".gitkeep":
-                file.unlink()
-        print(f"Deleted profile pictures from {PROFILE_PICS_DIR}")
-
     # Clear database tables (order respects foreign keys)
     async with AsyncSessionLocal() as db:
         await db.execute(delete(models.PasswordResetToken))
         await db.execute(delete(models.Post))
         await db.execute(delete(models.User))
         await db.commit()
-    print("Cleared existing data")
+    print("Cleared existing data from database")
 
 async def update_post_dates() -> None:
     now = datetime.now(UTC)

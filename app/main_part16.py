@@ -26,7 +26,7 @@ from app.core.config import settings
 
 CURRENT_DIR = Path(__file__).resolve().parent
 
-""" PostgreSQL and Alembic - Database Migrations for Production """
+""" Oracle Cloud  - Moving File Uploads to the Cloud """
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -37,7 +37,7 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.mount("/static", StaticFiles(directory=CURRENT_DIR / "static"), name="static")
-app.mount("/media", StaticFiles(directory=CURRENT_DIR.parent / "media"), name="media")
+
 templates = Jinja2Templates(directory=CURRENT_DIR / "templates")
 
 # Added files which includes the routes

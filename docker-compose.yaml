@@ -1,8 +1,7 @@
 version: "3.9"
 
-# Run: docker compose -f docker-compose.yml down
-# Run: docker compose -f docker-compose.yml up --build
-
+# Run: docker compose down -v
+# Run: docker compose up -d
 
 services:
   postgres:

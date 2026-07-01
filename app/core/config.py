@@ -19,6 +19,14 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
+    # Oracle Configuration
+    namespace: str
+    bucket_name: str
+    region: str = "eu-frankfurt-1"
+    access_key_id: SecretStr | None = None
+    secret_access_key: SecretStr | None = None
+    oracle_par_url: str
+
     max_upload_size_bytes: int = 5 * 1024 * 1024
 
     posts_per_page: int = 10

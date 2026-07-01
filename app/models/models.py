@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from app.core.config import settings
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -28,7 +29,11 @@ class User(Base):
     @property
     def image_path(self) -> str:
         if self.image_file:
-            return f"/media/profile_pics/{self.image_file}"
+            return (
+                f"https://{settings.namespace}.compat.objectstorage."
+                f"{settings.region}.oraclecloud.com/{settings.bucket_name}"
+                f"/profile_pics/{self.image_file}"
+            )
         return "/static/profile_pics/default.jpg"
 
 class Post(Base):

@@ -1,8 +1,9 @@
 from datetime import timedelta, UTC, datetime, timezone
-from typing import Optional
+
+from botocore.exceptions import ClientError
 from fastapi import HTTPException, BackgroundTasks, status, UploadFile
 from PIL import UnidentifiedImageError
-from pyexpat.errors import messages
+from httpx import Client
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.concurrency import run_in_threadpool
@@ -12,7 +13,11 @@ from sqlalchemy import delete as sql_delete
 
 from app.models import models
 from app.core.config import settings
-from app.utils.image import delete_profile_image, process_profile_image
+from app.utils.image import (
+    delete_profile_image,
+    process_profile_image,
+    upload_profile_image,
+)
 from app.database.schema import (
     UserCreate, UserUpdate, Token, PaginatedPostsResponse, PostResponse, ChangePasswordRequest, ForgotPasswordRequest, ResetPasswordRequest,
 )
@@ -234,7 +239,7 @@ class UserService:
         await self.db.commit()
 
         if old_filename:
-            delete_profile_image(old_filename)
+            await delete_profile_image(old_filename)
 
     async def upload_profile_picture(self, user_id: int, file: UploadFile, current_user: models.User) -> models.User:
         if current_user.id != user_id:
@@ -248,11 +253,20 @@ class UserService:
             )
 
         try:
-            new_filename = await run_in_threadpool(process_profile_image, content)
+            processed_bytes, new_filename = await run_in_threadpool(process_profile_image, content)
         except UnidentifiedImageError as err:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid image file. Please upload a valid image (JPEG, PNG, GIF, WebP).",
+            ) from err
+
+        # Upload to Oracle Cloud (also runs in threadpool via async wrapper)
+        try:
+            await upload_profile_image(processed_bytes, new_filename)
+        except ClientError as err:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to upload image. Please try again.",
             ) from err
 
         old_filename = current_user.image_file
@@ -263,7 +277,7 @@ class UserService:
 
         # first save the image and after delete it, protect more from fail save
         if old_filename:
-            delete_profile_image(old_filename)
+            await delete_profile_image(old_filename)
 
         return current_user
 
@@ -279,6 +293,6 @@ class UserService:
         await self.db.commit()
         await self.db.refresh(current_user)
 
-        delete_profile_image(old_filename) # delete the file
+        await delete_profile_image(old_filename) # delete the file
 
         return current_user
