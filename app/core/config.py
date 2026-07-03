@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     )
 
     database_url: str
+    database_url_test: str
 
     secret_key: SecretStr
     algorithm: str = "HS256"
@@ -33,6 +34,7 @@ class Settings(BaseSettings):
 
     reset_token_expire_minutes: int = 60
 
+    # Mail Configuration
     mail_server: str = "localhost"
     mail_port: int = 587
     mail_username: str = ""

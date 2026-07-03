@@ -26,7 +26,7 @@ from app.core.config import settings
 
 CURRENT_DIR = Path(__file__).resolve().parent
 
-""" Oracle Cloud  - Moving File Uploads to the Cloud """
+""" Test the API - Pytest, Fixtures and Mocking External """
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):

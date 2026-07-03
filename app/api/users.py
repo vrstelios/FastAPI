@@ -13,8 +13,6 @@ from app.core.config import settings
 from app.core.auth import CurrentUser
 from app.services.users_service import UserService
 
-from botocore.exceptions import ClientError
-
 router = APIRouter()
 
 async def get_user_service(db: Annotated[AsyncSession, Depends(get_db)]) -> UserService:
