@@ -15,7 +15,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.pool import NullPool
 
 from app.core.database import Base, get_db
-from app.main_part17 import app
+from app.main import app
+
+DATABASE_URL_TEST = os.getenv("DATABASE_URL_TEST", settings.database_url_test)
 
 pytest_plugins = ["anyio"]
 
@@ -25,7 +27,7 @@ def anyio_backend():
 
 @pytest.fixture(scope="session")
 def test_engine():
-    engine = create_async_engine(os.environ["DATABASE_URL_TEST"], poolclass=NullPool)
+    engine = create_async_engine(DATABASE_URL_TEST, poolclass=NullPool)
     return engine
 
 @pytest.fixture(scope="session")

@@ -14,7 +14,7 @@ from fastapi import FastAPI, Request, HTTPException, status, Depends
 from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import select, func
+from sqlalchemy import select, func, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -26,7 +26,7 @@ from app.core.config import settings
 
 CURRENT_DIR = Path(__file__).resolve().parent
 
-""" Test the API - Pytest, Fixtures and Mocking External """
+""" Deploy to a VPS - Security, Nginx, SSL, and Custom Domain """
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -43,6 +43,17 @@ templates = Jinja2Templates(directory=CURRENT_DIR / "templates")
 # Added files which includes the routes
 app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(posts.router, prefix="/api/posts", tags=["posts"])
+
+@app.get("/health")
+async def health_check(db: Annotated[AsyncSession, Depends(get_db)]):
+    try:
+        await db.execute(text("SELECT 1"))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database unavailable",
+        ) from exc
+    return {"status": "healthy"}
 
 # This endpoint loads all posts and renders the home page.
 @app.get("/", include_in_schema=False, name="home")

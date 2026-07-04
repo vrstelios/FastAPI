@@ -7,7 +7,7 @@ from sqlalchemy import delete, select, update
 
 from app.models import models
 from app.core.database import AsyncSessionLocal, engine
-from app.main_part16 import app
+from app.main import app
 
 POPULATE_IMAGES_DIR = Path("populate_images")
 
