@@ -16,7 +16,7 @@ A modern, high-performance blogging platform built with **FastAPI** and **SQLAlc
 - [Installation](#installation)
 - [Project Structure](#project-structure)
 - [Development](#development)
-- [API Documentation](#Swagger Documentation)
+- [Swagger Documentation](#Swagger-Documentation)
 - [Testing](#testing)
 - [Contributing](#contributing)
 
