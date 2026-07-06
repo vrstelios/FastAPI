@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastapi_blog_app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/postgres
+      - DATABASE_URL_TEST=postgresql+asyncpg://postgres:postgres@postgres_test:5432/test_blog
+      - DEBUG=${DEBUG:-false}
+      - SECRET_KEY=${SECRET_KEY}
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./app:/app/app
+      - ./uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      postgres_test:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  postgres_test:
+    image: postgres:15-alpine
+    container_name: postgres_test
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=test_blog
+    ports:
+      - "5434:5432"
+
+volumes:
+  postgres_data:

@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     )
 
     database_url: str
-    database_url_test: str
+    database_url_test: str | None = None
 
     secret_key: SecretStr
     algorithm: str = "HS256"

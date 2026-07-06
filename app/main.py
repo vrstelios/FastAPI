@@ -26,8 +26,6 @@ from app.core.config import settings
 
 CURRENT_DIR = Path(__file__).resolve().parent
 
-""" Deploy to a VPS - Security, Nginx, SSL, and Custom Domain """
-
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     yield
