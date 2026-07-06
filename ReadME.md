@@ -16,7 +16,7 @@ A modern, high-performance blogging platform built with **FastAPI** and **SQLAlc
 - [Installation](#installation)
 - [Project Structure](#project-structure)
 - [Development](#development)
-- [API Documentation](#Swagger Documentation)
+- [Swagger Documentation](#Swagger-Documentation)
 - [Testing](#testing)
 - [Contributing](#contributing)
 
@@ -44,7 +44,7 @@ A modern, high-performance blogging platform built with **FastAPI** and **SQLAlc
 - **Owner-Isolated Mutations:** Strict security checks ensuring users can only modify or delete their own posts.
 
 ### User & Authentication
-- **OAuth2 JWT Authentication:** Secured endpoints using modern stateless JSON Web Tokens.
+- **JWT Authentication:** Secured endpoints using modern stateless JSON Web Tokens.
 - **Secure Password Hashing:** Password storage built on secure cryptographic hashing functions.
 - **Password Recovery Flow:** Dedicated data structures (`password_reset_tokens`) providing secure, short-lived reset workflows.
 
@@ -158,9 +158,9 @@ fastapi-blog/
 ## Installation
 
 ### Prerequisites
-- [Docker Desktop](https://docs.docker.com/get-docker/) (Includes Docker Compose v2)
-- [Python 3.11+](https://www.python.org/downloads/) (Required for local test orchestration)
-- [uv](https://github.com/astral-sh/uv) (Extremely fast local Python package manager)
+- [Docker Desktop](https://docs.docker.com/get-docker/) 
+- [Python 3.11+](https://www.python.org/downloads/) 
+- [uv](https://github.com/astral-sh/uv) 
 
 ### Quick Start with Docker
 
